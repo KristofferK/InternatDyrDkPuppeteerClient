@@ -14,6 +14,20 @@ export class InternatDyrClient {
     return Promise.resolve(new InternatDyrClient(browser, page));
   }
 
+  async acceptCookies() {
+    await this.page.evaluate(() => {
+      const cookieButton = <HTMLButtonElement>document.querySelector('.cookie.alert.alert-info button');
+      if (cookieButton != null) {
+        cookieButton.click();
+      }
+
+      const cookieDiv = <HTMLDivElement>document.querySelector('.cookie-wrap');
+      if (cookieDiv != null) {
+        cookieDiv.remove();
+      }
+    });
+  }
+
   async search(zip: number, species: Animal[], distance: Distance) {
     await this.page.goto("https://internat-dyr.dk/index/");
 
@@ -33,6 +47,19 @@ export class InternatDyrClient {
 
     await this.page.click('#search-zip button[type="submit"]');
     await this.page.waitForNavigation();
+  }
+
+  async loadMoreResults(timeInMillisecondsToWaitForResponse: number = 1000) {
+    const rowsBeforeLoadingMore = await this.page.evaluate(() => document.querySelectorAll('#animallist .row').length);
+    await this.page.evaluate(() => {
+      const loadMoreButton = <HTMLButtonElement>document.querySelector('#load-more');
+      if (loadMoreButton != null) {
+        loadMoreButton.click();
+      }
+    });
+    await this.page.waitFor(timeInMillisecondsToWaitForResponse);
+    const rowsAfterLoadingMore = await this.page.evaluate(() => document.querySelectorAll('#animallist .row').length);
+    return rowsAfterLoadingMore - rowsBeforeLoadingMore;
   }
 
   async screenshot(path: string, fullPage: boolean) {
