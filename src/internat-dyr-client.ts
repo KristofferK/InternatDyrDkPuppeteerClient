@@ -1,5 +1,6 @@
 import * as puppeteer from 'puppeteer';
 import { Animal } from './animal';
+import { Distance } from './distance';
 
 export class InternatDyrClient {
 
@@ -13,11 +14,11 @@ export class InternatDyrClient {
     return Promise.resolve(new InternatDyrClient(browser, page));
   }
 
-  async search(zip: number, species: Animal[], distance: number) {
+  async search(zip: number, species: Animal[], distance: Distance) {
     await this.page.goto("https://internat-dyr.dk/index/");
 
     await this.page.type('#postal', zip.toString());
-    await this.page.evaluate((distance: number, species: number[]) => {
+    await this.page.evaluate((distance: Distance, species: Animal[]) => {
       species.forEach(speciesId => {
         const speciesElement = <HTMLAnchorElement>document.querySelector('[data-original-index="'+speciesId+'"] a');
         if (speciesElement != null) {
