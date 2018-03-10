@@ -38,7 +38,7 @@ export class InternatDyrClient {
       const shelterTags = document.querySelectorAll('div.col-xs-12 ul li a');
       return Array.prototype.slice.call(shelterTags).map((e: HTMLAnchorElement) => e.title);
     });
-    return Promise.resolve(shelters);
+    return Promise.resolve(shelters.map((e: string) => new Shelter(e)));
   }
 
   async search(zip: number, species: Animal[], distance: Distance) {
