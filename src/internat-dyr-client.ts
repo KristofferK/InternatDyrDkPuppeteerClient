@@ -1,9 +1,10 @@
 import * as puppeteer from 'puppeteer';
 import { Animal } from './animal';
 import { Distance } from './distance';
+import { Shelter } from './shelter';
 
 export class InternatDyrClient {
-
+  private readonly BASE_URL = "https://internat-dyr.dk/";
   private constructor(private browser: puppeteer.Browser, private page: puppeteer.Page) {
   }
 
@@ -28,8 +29,20 @@ export class InternatDyrClient {
     });
   }
 
+  async goToSheltersPage() {
+    await this.page.goto(this.BASE_URL + "internater/");
+  }
+
+  async getShelters(): Promise<Shelter[]> {
+    const shelters = await this.page.evaluate(() => {
+      const shelterTags = document.querySelectorAll('div.col-xs-12 ul li a');
+      return Array.prototype.slice.call(shelterTags).map((e: HTMLAnchorElement) => e.title);
+    });
+    return Promise.resolve(shelters);
+  }
+
   async search(zip: number, species: Animal[], distance: Distance) {
-    await this.page.goto("https://internat-dyr.dk/index/");
+    await this.page.goto(this.BASE_URL + "index/");
 
     await this.page.type('#postal', zip.toString());
     await this.page.evaluate((distance: Distance, species: Animal[]) => {
@@ -49,7 +62,7 @@ export class InternatDyrClient {
     await this.page.waitForNavigation();
   }
 
-  async loadMoreResults(timeInMillisecondsToWaitForResponse: number = 1000) {
+  async loadMoreResults(timeInMillisecondsToWaitForResponse: number = 1000): Promise<number> {
     const rowsBeforeLoadingMore = await this.page.evaluate(() => document.querySelectorAll('#animallist .row').length);
     await this.page.evaluate(() => {
       const loadMoreButton = <HTMLButtonElement>document.querySelector('#load-more');

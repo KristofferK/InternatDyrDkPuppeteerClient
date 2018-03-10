@@ -12,3 +12,11 @@ import { Distance } from "./distance";
   }
   await client.screenshot('dump2.jpg', true);
 })();
+
+(async() => {
+  const client = await InternatDyrClient.initialize();
+  await client.goToSheltersPage();
+  await client.screenshot('sheltersPage.jpg', true);
+  const shelters = await client.getShelters();
+  console.log('Found shelters:', shelters);
+})();
